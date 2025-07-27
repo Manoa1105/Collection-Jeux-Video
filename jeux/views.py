@@ -2,26 +2,24 @@ from django.shortcuts import render, redirect, get_object_or_404
 from jeux.models import JeuVideo
 from .form import JeuVideoForm
 from django.contrib import messages
-
+from random import sample
 from django.db.models import Count
+
+
 
 def accueil(request):
     total_jeux = JeuVideo.objects.count()
+    total_plateformes = JeuVideo.objects.values('plateforme').distinct().count()
+    total_genres = JeuVideo.objects.values('genres').distinct().count()
 
-    # ✅ Comptage des plateformes utilisées (même si doublons dans les titres)
-    total_plateformes = JeuVideo.objects.values('plateforme').annotate(c=Count('id')).count()
-
-    # ✅ Comptage des genres utilisés
-    total_genres = JeuVideo.objects.values('genres').annotate(c=Count('id')).count()
-
-    stats = [
-        {"val": total_jeux, "label": "Jeux enregistrés", "icon": "🎯"},
-        {"val": total_plateformes, "label": "Plateformes", "icon": "🖥️"},
-        {"val": total_genres, "label": "Genres disponibles", "icon": "🎲"},
-    ]
+    tous_les_jeux = list(JeuVideo.objects.all())
+    jeux_affiches = sample(tous_les_jeux, min(7, len(tous_les_jeux)))  # max 7 jeux aléatoires
 
     return render(request, 'accueil.html', {
-        'stats': stats
+        'total_jeux': total_jeux,
+        'total_plateformes': total_plateformes,
+        'total_genres': total_genres,
+        'jeux': jeux_affiches,
     })
 
 # ✅ Ajouter un jeu

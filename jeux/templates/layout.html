@@ -1,15 +1,18 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="fr">
-
+<html lang="fr" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <title>{% block title %}ManoGame{% endblock %}</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/png" href="{% static 'images/logo-mano.png' %}" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Config Tailwind -->
     <script>
         tailwind.config = {
+            darkMode: 'class',
             theme: {
                 extend: {
                     colors: {
@@ -22,72 +25,103 @@
                         netflix: ['Montserrat', 'sans-serif']
                     },
                     animation: {
-                        fade: 'fadeIn 0.4s ease-out',
+                        fade: 'fadeIn 0.5s ease-in-out',
+                        'fade-in-down': 'fadeInDown 0.4s ease-out both'
                     },
                     keyframes: {
                         fadeIn: {
-                            '0%': { opacity: 0, transform: 'scale(0.95)' },
-                            '100%': { opacity: 1, transform: 'scale(1)' },
+                            '0%': { opacity: 0 },
+                            '100%': { opacity: 1 }
+                        },
+                        fadeInDown: {
+                            '0%': { opacity: 0, transform: 'translateY(-10px)' },
+                            '100%': { opacity: 1, transform: 'translateY(0)' }
                         }
                     }
                 }
             }
-        }
+        };
     </script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+
+    <!-- Navigation Styles -->
+    <style>
+        html, body {
+            overflow-x: hidden;
+        }
+
+        .nav-link {
+            position: relative;
+            color: white;
+            transition: color 0.3s ease-in-out;
+        }
+
+        .nav-link:hover {
+            color: #e50914;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            height: 2px;
+            width: 0;
+            background-color: #e50914;
+            transition: width 0.3s ease-in-out;
+        }
+
+        .nav-link:hover::after,
+        .nav-link.active-link::after {
+            width: 100%;
+        }
+
+        .active-link {
+            color: #e50914;
+            font-weight: bold;
+        }
+    </style>
 </head>
 
-<body class="bg-netflixDark text-white font-netflix">
-    <!-- Navigation principale -->
-    <header class="sticky top-0 z-50 bg-black bg-opacity-90 shadow-md">
-        <nav class="max-w-7xl mx-auto flex items-center justify-between px-6 py-4">
-            <a href="/" class="flex items-center space-x-2">
-                <img src="{% static 'images/logo-mano.png' %}" alt="ManoGame Logo" class="h-10 w-auto" />
-                <span class="text-2xl font-bold text-white"><span class="text-netflixRed">Mano</span>Game</span>
+<body class="bg-[#121212] text-white font-netflix overflow-x-hidden">
+
+<!-- Barre de navigation -->
+<header class="sticky top-0 z-50 bg-black/80 backdrop-blur-md shadow-md border-b border-white/10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-20">
+
+            <!-- Logo -->
+            <a href="{% url 'home' %}" class="flex items-center gap-3">
+                <img src="{% static 'images/logo-mano.png' %}" alt="Logo ManoGame" class="h-16 w-auto">
+                <span class="text-2xl font-extrabold leading-none">
+                    <span class="text-netflixRed">Mano</span><span class="text-white">Game</span>
+                </span>
             </a>
 
-            <ul class="flex space-x-6 text-sm md:text-base">
-                <li><a href="/" class="hover:text-netflixRed transition">Accueil</a></li>
-                <li><a href="{% url 'list_jeux' %}" class="hover:text-netflixRed transition">Liste</a></li>
-                <li><a href="{% url 'ajouter_jeu' %}" class="hover:text-netflixRed transition">Ajouter</a></li>
-                <li><a href="/admin" class="hover:text-netflixRed transition">Admin</a></li>
-            </ul>
-        </nav>
-    </header>
+            <!-- Menu navigation -->
+            <nav class="flex items-center gap-10 text-sm font-medium">
+                <a href="{% url 'home' %}" class="nav-link {% if request.resolver_match.url_name == 'accueil' %}active-link{% endif %}">Accueil</a>
+                <a href="{% url 'list_jeux' %}" class="nav-link {% if request.resolver_match.url_name == 'list_jeux' %}active-link{% endif %}">Liste</a>
+                <a href="{% url 'ajouter_jeu' %}" class="nav-link {% if request.resolver_match.url_name == 'ajouter_jeu' %}active-link{% endif %}">Ajouter</a>
+                <a href="/admin" class="nav-link">Admin</a>
+            </nav>
 
-    <!-- Contenu principal -->
-    <main class="flex-1 max-w-7xl mx-auto px-4 py-10 animate-fade" role="main">
-        {% block content %}{% endblock %}
-    </main>
-
-    <!-- Footer -->
-    <footer class="bg-[#1e1e1e] text-gray-400 text-center text-sm py-6 shadow-inner" role="contentinfo">
-        <div class="max-w-7xl mx-auto px-4">
-            &copy; 2025 ManoGame. Tous droits réservés.
         </div>
-    </footer>
+    </div>
+</header>
 
-    <style>
-      body.fade-out {
-        opacity: 0;
-        transition: opacity 0.3s ease-in-out;
-      }
-    </style>
+<!-- Contenu dynamique -->
+<main class="p-6 md:p-10 min-h-[80vh]">
+    {% block content %}
+    {% endblock %}
+</main>
 
-    <script>
-        document.querySelectorAll('a[href]').forEach(link => {
-            if (link.getAttribute('target') === '_blank') return;
+<!-- Pied de page -->
+<footer class="text-center text-sm text-gray-500 py-6 opacity-60">
+    &copy; {{ now|date:"Y" }} ManoGame. Tous droits réservés.
+</footer>
 
-            link.addEventListener('click', function (e) {
-                const href = link.getAttribute('href');
-                if (href && !href.startsWith('#') && !href.startsWith('javascript:')) {
-                    e.preventDefault();
-                    document.body.classList.add('fade-out');
-                    setTimeout(() => {
-                        window.location.href = href;
-                    }, 300);
-                }
-            });
-        });
-    </script>
 </body>
 </html>

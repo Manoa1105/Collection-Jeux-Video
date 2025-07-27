@@ -4,7 +4,8 @@
 {% block title %}Accueil – ManoGame{% endblock %}
 
 {% block content %}
-<!-- ✅ Flash messages -->
+
+<!-- Section des messages flash (notifications de succès, etc.) -->
 {% if messages %}
 <div id="message-container" class="mt-6 mb-4 w-full max-w-xl animate-fade transition-opacity duration-500 mx-auto">
     {% for message in messages %}
@@ -15,10 +16,10 @@
 </div>
 {% endif %}
 
-<!-- ✅ Section principale -->
+<!-- Section principale de la page d'accueil -->
 <section class="relative z-10 flex flex-col items-center text-center gap-8 px-4">
 
-  <!-- 🎬 Vidéo de fond avec playlist -->
+  <!-- Vidéo de fond en arrière-plan -->
   <div class="fixed inset-0 -z-10 overflow-hidden bg-black">
       <video id="bg-video" autoplay muted playsinline preload="auto"
              class="absolute top-1/2 left-1/2 min-w-full min-h-full w-auto h-auto -translate-x-1/2 -translate-y-1/2 object-contain opacity-40">
@@ -26,32 +27,54 @@
       </video>
   </div>
 
-  <!-- ✅ Logo animé en 3D (texte ManoGame) -->
-  <div class="text-[48px] md:text-[64px] font-black font-netflix text-white tracking-widest animate-logo3D drop-shadow-2xl">
-    ManoGame
-  </div>
+  <!-- Titre principal -->
+  <h1 class="text-3xl sm:text-4xl md:text-5xl font-extrabold text-center text-transparent bg-clip-text bg-gradient-to-r from-red-600 via-white to-red-600 animate-glow drop-shadow-xl">
+    Bienvenue dans ta collection de jeux vidéo
+  </h1>
 
+  <!-- Sous-titre -->
   <p class="text-gray-400 text-lg max-w-xl animate-fade delay-100">
       Gère, note et explore tes jeux favoris dans une interface fluide et moderne.
   </p>
 
-  <!-- ✅ Statistiques dynamiques -->
-  <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 w-full max-w-5xl px-4 animate-fade delay-200">
-      <div class="bg-black/40 backdrop-blur-md p-6 rounded-xl shadow-xl text-center hover:scale-105 transition">
+  <!-- Carrousel Coverflow contenant les jaquettes des jeux -->
+  {% if jeux %}
+  <div class="relative w-full max-w-6xl h-80 mx-auto mt-10">
+    <div id="coverflow" class="relative w-full h-full flex items-center justify-center overflow-hidden">
+      {% for jeu in jeux %}
+      <div class="coverflow-item absolute w-52 h-72 bg-black text-white text-center transition-all duration-700 ease-in-out rounded-xl shadow-lg overflow-hidden">
+        {% if jeu.jaquette %}
+          <img src="{{ jeu.jaquette.url }}" alt="{{ jeu.titre }}" class="w-full h-48 object-cover">
+        {% else %}
+          <img src="{% static 'images/jaquettes/default_cover.png' %}" alt="Image par défaut" class="w-full h-48 object-cover">
+        {% endif %}
+        <div class="info">
+          <h3>{{ jeu.titre }}</h3>
+          <p>{{ jeu.plateforme }}</p>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Cartes statistiques résumant les données enregistrées -->
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 w-full max-w-5xl px-4">
+      <div class="card-stat delay-[100ms]">
           <p class="text-3xl font-bold">{{ total_jeux|default:"0" }}</p>
           <p class="text-sm text-gray-300">Jeux enregistrés</p>
       </div>
-      <div class="bg-black/40 backdrop-blur-md p-6 rounded-xl shadow-xl text-center hover:scale-105 transition delay-100">
+      <div class="card-stat delay-[300ms]">
           <p class="text-3xl font-bold">{{ total_plateformes|default:"0" }}</p>
           <p class="text-sm text-gray-300">Plateformes</p>
       </div>
-      <div class="bg-black/40 backdrop-blur-md p-6 rounded-xl shadow-xl text-center hover:scale-105 transition delay-200">
+      <div class="card-stat delay-[500ms]">
           <p class="text-3xl font-bold">{{ total_genres|default:"0" }}</p>
           <p class="text-sm text-gray-300">Genres disponibles</p>
       </div>
   </div>
 
-  <!-- ✅ Actions -->
+  <!-- Boutons d'action : Voir liste des jeux ou en ajouter un nouveau -->
   <div class="flex flex-wrap justify-center gap-4 animate-fade delay-300">
       <a href="{% url 'list_jeux' %}" class="bg-netflixRed hover:bg-red-700 text-white px-6 py-3 rounded-full font-semibold transition hover:scale-105" aria-label="Accéder à la liste des jeux">
           Voir la liste
@@ -61,68 +84,125 @@
       </a>
   </div>
 
-  <!-- ✅ Illustration -->
-  <div class="animate-fade delay-400">
-      <img src="{% static 'images/gamepad-icon.png' %}" alt="Icône de jeu" class="w-20 sm:w-24 opacity-80 mx-auto hover:scale-110 hover:rotate-2 transition duration-300" loading="lazy">
-  </div>
-
-  <!-- ✅ Citation -->
+  <!-- Citation finale inspirante -->
   <p class="text-gray-400 italic text-sm animate-fade delay-500">
       Chaque jeu a une histoire. Commence ta collection.
   </p>
 
 </section>
 
-<!-- ✅ Bannière de bienvenue -->
-<div id="welcome-banner" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-90 text-white backdrop-blur-md animate-fadeInSlow">
-  <div class="text-center space-y-4">
-    <h1 class="text-4xl md:text-5xl font-bold tracking-wide animate-pulseSlow">
-      🎮 Bienvenue sur <span class="text-netflixRed">ManoGame</span>
-    </h1>
-    <p class="text-lg text-gray-300">Ta collection vidéoludique, élégante et personnalisée.</p>
-    <button onclick="dismissBanner()" class="mt-4 bg-netflixRed hover:bg-red-700 transition px-6 py-2 rounded-full font-semibold shadow">
-      Commencer
-    </button>
-  </div>
-</div>
-
-<!-- ✅ Styles custom -->
+<!-- Styles personnalisés (idéalement à déplacer dans accueil.css) -->
 <style>
-  @keyframes fadeInSlow {
-    0% { opacity: 0; transform: scale(0.95); }
-    100% { opacity: 1; transform: scale(1); }
-  }
-  .animate-fadeInSlow {
-    animation: fadeInSlow 1.2s ease-out;
-  }
-
-  @keyframes pulseSlow {
-    0%, 100% { transform: scale(1); opacity: 1; }
-    50% { transform: scale(1.05); opacity: 0.8; }
-  }
-  .animate-pulseSlow {
-    animation: pulseSlow 2.5s infinite;
-  }
-
-  .fade-out {
+  /* Animation d'apparition pour les cartes statistiques */
+  .card-stat {
+    background-color: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(8px);
+    padding: 1.5rem;
+    border-radius: 0.75rem;
+    text-align: center;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
     opacity: 0;
-    transition: opacity 0.7s ease-out;
+    transform: scale(0.9);
+    animation: fadeZoom 0.5s ease-out forwards;
   }
 
-  @keyframes logo3D {
-    0% { transform: rotateY(0deg) scale(0.9); opacity: 0; }
-    100% { transform: rotateY(360deg) scale(1); opacity: 1; }
+  @keyframes fadeZoom {
+    0% { opacity: 0; transform: scale(0.9) translateY(20px); }
+    100% { opacity: 1; transform: scale(1) translateY(0); }
   }
-  .animate-logo3D {
-    animation: logo3D 1.8s ease-out;
-    transform-origin: center;
-    will-change: transform, opacity;
+
+  .delay-\[100ms\] { animation-delay: 0.1s; }
+  .delay-\[300ms\] { animation-delay: 0.3s; }
+  .delay-\[500ms\] { animation-delay: 0.5s; }
+
+  @keyframes glowGradient {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+
+  .animate-glow {
+    background-size: 200% 200%;
+    animation: glowGradient 4s ease-in-out infinite;
+  }
+
+  /* Styles du coverflow */
+  #coverflow {
+    perspective: 1000px;
+    transform-style: preserve-3d;
+  }
+
+  .coverflow-item {
+    position: absolute;
+    width: 192px;
+    height: 320px;
+    border-radius: 1rem;
+    background-color: rgba(15, 15, 15, 0.85);
+    box-shadow: 0 15px 25px rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow: hidden;
+    transition: transform 0.7s ease, opacity 0.5s ease;
+    border: 1px solid #2f2f2f;
+    opacity: 0.8;
+    transform-origin: center center;
+  }
+
+  .coverflow-item.active {
+    transform: rotateY(0deg) translateZ(400px) scale(1.2);
+    opacity: 1;
+    z-index: 999;
+  }
+
+  .coverflow-item:hover {
+    filter: brightness(1.05);
+    box-shadow: 0 0 30px #e50914cc;
+  }
+
+  .coverflow-item img {
+    width: 100%;
+    height: 192px;
+    object-fit: cover;
+    object-position: top;
+    border-top-left-radius: 1rem;
+    border-top-right-radius: 1rem;
+    transition: transform 0.3s ease;
+  }
+
+  .coverflow-item:hover img {
+    transform: scale(1.05);
+  }
+
+  .coverflow-item .info {
+    flex: 1;
+    width: 100%;
+    background-color: rgba(0, 0, 0, 0.65);
+    color: white;
+    padding: 0.5rem;
+    text-align: center;
+  }
+
+  .coverflow-item .info h3 {
+    font-size: 0.95rem;
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .coverflow-item .info p {
+    font-size: 0.75rem;
+    color: #bbb;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-top: 0.25rem;
   }
 </style>
 
-<!-- ✅ JS pour messages & vidéos -->
+<!-- Scripts JS personnalisés (idéalement à déplacer dans accueil.js) -->
 <script>
-  // Disparition des messages
+  // Disparition automatique des messages flash après 4 secondes
   setTimeout(() => {
     const msg = document.getElementById('message-container');
     if (msg) {
@@ -132,7 +212,7 @@
     }
   }, 4000);
 
-  // Enchaînement de vidéos
+  // Gestion du changement automatique de vidéo
   document.addEventListener('DOMContentLoaded', function () {
     const video = document.getElementById('bg-video');
     const playlist = [
@@ -147,13 +227,36 @@
     });
   });
 
-  // Dismiss welcome banner
-  function dismissBanner() {
-    const banner = document.getElementById('welcome-banner');
-    if (banner) {
-      banner.classList.add('fade-out');
-      setTimeout(() => banner.remove(), 700);
-    }
-  }
+  // Animation du coverflow (rotation 3D des jaquettes)
+  document.addEventListener("DOMContentLoaded", () => {
+    const items = document.querySelectorAll('.coverflow-item');
+    let current = 0;
+
+    const updateCoverflow = () => {
+      const total = items.length;
+      const angleStep = 360 / total;
+
+      items.forEach((item, index) => {
+        const angle = angleStep * ((index - current + total) % total);
+        const rad = angle * (Math.PI / 180);
+
+        item.classList.remove('active');
+        item.style.transform = `rotateY(${angle}deg) translateZ(400px)`;
+        item.style.zIndex = Math.round(100 * Math.cos(rad));
+        item.style.opacity = Math.cos(rad) > 0.5 ? 1 : 0.2;
+
+        if (angle === 0 || Math.abs((angle - 360) % 360) < 0.01) {
+          item.classList.add('active');
+        }
+      });
+    };
+
+    updateCoverflow();
+    setInterval(() => {
+      current = (current + 1) % items.length;
+      updateCoverflow();
+    }, 3500);
+  });
 </script>
+
 {% endblock %}

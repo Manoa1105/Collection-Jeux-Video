@@ -5,7 +5,7 @@
 
 {% block content %}
 
-<!-- 🎬 Vidéo de fond -->
+<!-- Vidéo de fond floutée -->
 <div class="fixed inset-0 -z-10 overflow-hidden">
   <video autoplay muted loop playsinline preload="auto"
          class="w-full h-full object-cover opacity-20 blur-sm">
@@ -13,26 +13,24 @@
   </video>
 </div>
 
-<!-- ✅ Message Flash élégant -->
+<!-- Messages flash de succès (style animé) -->
 {% if messages %}
-<div id="message-container" class="fixed top-6 left-1/2 transform -translate-x-1/2 z-50 max-w-md w-full px-4 animate-fade">
+<div id="message-container" class="fixed top-6 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-md px-4 animate-slideDownFade">
     {% for message in messages %}
-    <div class="flex items-center gap-3 p-4 bg-green-600 text-white rounded-lg shadow-lg shadow-black/50 border border-green-400 animate-fade-in-down">
+    <div class="flex items-center gap-3 p-4 rounded-xl shadow-xl bg-gradient-to-r from-green-500 to-emerald-600 text-white border-l-4 border-emerald-400 animate-toastPulse">
         <svg class="w-6 h-6 text-white shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
         </svg>
-        <span class="text-sm font-medium">
-            {{ message }}
-        </span>
+        <span class="text-sm font-medium">{{ message }}</span>
     </div>
     {% endfor %}
 </div>
 {% endif %}
 
-<!-- 🧭 Titre principal -->
+<!-- Titre principal -->
 <h1 class="text-4xl font-extrabold text-center mb-10 tracking-wider animate-fade">Liste des Jeux Vidéo</h1>
 
-<!-- 🔍 Filtres -->
+<!-- Formulaire de filtres multi-critères -->
 <form method="get" class="bg-black/60 backdrop-blur-sm text-white rounded-xl shadow p-6 mb-10 flex flex-wrap gap-4 items-end justify-between animate-fade">
     <input type="text" name="recherche" placeholder="Rechercher un jeu (titre)..." value="{{ request.GET.recherche }}"
         class="flex-grow px-4 py-2 min-w-[200px] bg-[#2a2a2a] border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#e50914]">
@@ -63,20 +61,21 @@
     </button>
 </form>
 
-<!-- 🗂️ Liste des jeux -->
+<!-- Grille des cartes de jeux -->
 {% if jeux %}
-<div id="cardsContainer" class="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 animate-fade">
+<div id="cardsContainer" class="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
     {% for jeu in jeux %}
-    <div class="relative bg-[#1c1c1c] rounded-xl overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-[0_0_30px_#e50914] hover:ring-2 hover:ring-[#00ff99]">
+    {% with delay=forloop.counter0|stringformat:"d" %}
+    <div class="relative bg-[#1c1c1c] rounded-xl overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-[0_0_30px_#e50914] hover:ring-2 hover:ring-[#00ff99] animate-card delay-{{ delay|add:"0"|slice:":1" }}00">
 
-        <!-- 🎨 Jaquette -->
+        <!-- Image du jeu -->
         <img 
             src="{% if jeu.jaquette %}{{ jeu.jaquette.url }}{% else %}{% static 'images/jaquettes/default_cover.png' %}{% endif %}" 
             alt="Jaquette du jeu {{ jeu.titre }}"
             class="w-full h-48 object-cover rounded-t-xl shadow-inner shadow-black/40 transition duration-300 group-hover:scale-105"
         />
 
-        <!-- 📝 Titre + note -->
+        <!-- Titre et note -->
         <div class="p-4 border-b border-[#333] flex items-center justify-between">
             <h2 class="text-lg font-semibold truncate">{{ jeu.titre }}</h2>
             {% if jeu.note_personnelle %}
@@ -86,50 +85,57 @@
             {% endif %}
         </div>
 
-        <!-- 📋 Détails -->
+        <!-- Détails du jeu -->
         <div class="p-4 text-sm grid gap-1 text-gray-300">
-            <p><span class="text-gray-400 font-medium">🎮 Plateforme :</span> {{ jeu.get_plateforme_display }}</p>
-            <p><span class="text-gray-400 font-medium">🎯 Genre :</span> {{ jeu.get_genre_display }}</p>
-            <p><span class="text-gray-400 font-medium">🗓️ Date :</span> {{ jeu.date_de_sortie|date:"d/m/Y" }}</p>
+            <p><span class="text-gray-400 font-medium">Plateforme :</span> {{ jeu.get_plateforme_display }}</p>
+            <p><span class="text-gray-400 font-medium">Genre :</span> {{ jeu.get_genre_display }}</p>
+            <p><span class="text-gray-400 font-medium">Date :</span> {{ jeu.date_de_sortie|date:"d/m/Y" }}</p>
         </div>
 
-        <!-- ⚙️ Actions -->
+        <!-- Liens d'action -->
         <div class="p-4 border-t border-[#333] flex justify-between text-sm">
             <a href="{% url 'modifier_jeu' jeu.id %}" class="text-blue-400 hover:text-blue-600 transition font-medium">Modifier</a>
             <a href="{% url 'confirmer_suppression' jeu.id %}" class="text-red-400 hover:text-red-600 transition font-medium">Supprimer</a>
         </div>
     </div>
+    {% endwith %}
     {% endfor %}
 </div>
 {% else %}
 <p class="text-center mt-10 text-gray-400 animate-fade">Aucun jeu ne correspond à votre recherche.</p>
 {% endif %}
 
-<!-- ❌ Modale de suppression -->
+<!-- Modale de confirmation de suppression -->
 {% if confirm_delete %}
-<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
-    <div class="bg-[#1e1e1e] text-white p-8 rounded-xl shadow-xl max-w-md w-full text-center animate-fade">
-        <h2 class="text-2xl font-bold text-red-600 mb-4">Confirmation de suppression</h2>
-        <p class="text-gray-300 mb-6 leading-relaxed">
-            Supprimer <strong>{{ jeu.titre }}</strong> ({{ jeu.plateforme }}) ?<br>
-            <span class="text-sm text-red-400 font-medium">Cette action est irréversible.</span>
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm px-4">
+    <div class="bg-[#1e1e1e] text-white p-8 rounded-2xl shadow-2xl max-w-md w-full text-center animate-fade-in-down">
+        <div class="flex flex-col items-center mb-4">
+            <svg class="w-12 h-12 text-red-500 mb-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M12 17a5 5 0 100-10 5 5 0 000 10z" />
+            </svg>
+            <h2 class="text-2xl font-bold">Supprimer ce jeu ?</h2>
+        </div>
+        <p class="text-gray-300 mb-6">
+            <strong>{{ jeu.titre }}</strong> ({{ jeu.plateforme }}) sera <span class="text-red-400">supprimé définitivement</span>.<br>
+            Cette action est <strong>irréversible</strong>.
         </p>
         <form method="post">
             {% csrf_token %}
             <div class="flex justify-center gap-4">
-                <a href="{% url 'list_jeux' %}" class="px-4 py-2 text-sm bg-[#444] text-white rounded-md hover:bg-[#666] transition">Annuler</a>
-                <button type="submit" autofocus class="px-4 py-2 text-sm bg-[#e50914] text-white rounded-md hover:bg-[#b00710] transition focus:outline-none focus:ring-2 focus:ring-[#e50914]">Supprimer définitivement</button>
+                <a href="{% url 'list_jeux' %}" class="px-5 py-2 text-sm bg-[#444] text-white rounded-full hover:bg-[#666] transition">Annuler</a>
+                <button type="submit" autofocus class="px-5 py-2 text-sm bg-red-600 hover:bg-red-700 text-white font-semibold rounded-full shadow-lg focus:outline-none focus:ring-2 focus:ring-red-400">
+                    Supprimer définitivement
+                </button>
             </div>
         </form>
     </div>
 </div>
 {% endif %}
 
-<!-- 🎯 Scripts -->
+<!-- Scripts de transition et disparition des messages -->
 <script src="https://cdn.skypack.dev/@hotwired/turbo"></script>
-
 <script>
-    // Disparition automatique des messages
+    // Disparition automatique des messages flash
     setTimeout(() => {
         const msg = document.getElementById('message-container');
         if (msg) {
@@ -139,7 +145,7 @@
         }
     }, 4000);
 
-    // Transition page fade-out
+    // Animation de transition sur les liens
     document.querySelectorAll('a[href]').forEach(link => {
         if (link.getAttribute('target') === '_blank') return;
         link.addEventListener('click', function (e) {
@@ -155,18 +161,28 @@
     });
 </script>
 
+<!-- Styles personnalisés supplémentaires -->
 <style>
-@keyframes fade-in-down {
-  from { opacity: 0; transform: translateY(-20px); }
-  to { opacity: 1; transform: translateY(0); }
+@keyframes cardFadeIn {
+  0% { opacity: 0; transform: translateY(30px) scale(0.95); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
 }
-.animate-fade-in-down {
-  animation: fade-in-down 0.5s ease-out both;
+.animate-card {
+  animation: cardFadeIn 0.6s ease-out forwards;
+  opacity: 0;
 }
-body.fade-out {
-    opacity: 0;
-    transition: opacity 0.3s ease-in-out;
-}
+
+/* Délai en cascade pour les cartes */
+.delay-000 { animation-delay: 0ms; }
+.delay-100 { animation-delay: 100ms; }
+.delay-200 { animation-delay: 200ms; }
+.delay-300 { animation-delay: 300ms; }
+.delay-400 { animation-delay: 400ms; }
+.delay-500 { animation-delay: 500ms; }
+.delay-600 { animation-delay: 600ms; }
+.delay-700 { animation-delay: 700ms; }
+.delay-800 { animation-delay: 800ms; }
+.delay-900 { animation-delay: 900ms; }
 </style>
 
 {% endblock %}
