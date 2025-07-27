@@ -1,0 +1,93 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}ManoGame{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="{% static 'images/logo-mano.png' %}" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        netflixDark: '#121212',
+                        netflixBlack: '#000000',
+                        netflixRed: '#e50914',
+                        lightAccent: '#cc0000',
+                    },
+                    fontFamily: {
+                        netflix: ['Montserrat', 'sans-serif']
+                    },
+                    animation: {
+                        fade: 'fadeIn 0.4s ease-out',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: 0, transform: 'scale(0.95)' },
+                            '100%': { opacity: 1, transform: 'scale(1)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="bg-netflixDark text-white font-netflix">
+    <!-- Navigation principale -->
+    <header class="sticky top-0 z-50 bg-black bg-opacity-90 shadow-md">
+        <nav class="max-w-7xl mx-auto flex items-center justify-between px-6 py-4">
+            <a href="/" class="flex items-center space-x-2">
+                <img src="{% static 'images/logo-mano.png' %}" alt="ManoGame Logo" class="h-10 w-auto" />
+                <span class="text-2xl font-bold text-white"><span class="text-netflixRed">Mano</span>Game</span>
+            </a>
+
+            <ul class="flex space-x-6 text-sm md:text-base">
+                <li><a href="/" class="hover:text-netflixRed transition">Accueil</a></li>
+                <li><a href="{% url 'list_jeux' %}" class="hover:text-netflixRed transition">Liste</a></li>
+                <li><a href="{% url 'ajouter_jeu' %}" class="hover:text-netflixRed transition">Ajouter</a></li>
+                <li><a href="/admin" class="hover:text-netflixRed transition">Admin</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Contenu principal -->
+    <main class="flex-1 max-w-7xl mx-auto px-4 py-10 animate-fade" role="main">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-[#1e1e1e] text-gray-400 text-center text-sm py-6 shadow-inner" role="contentinfo">
+        <div class="max-w-7xl mx-auto px-4">
+            &copy; 2025 ManoGame. Tous droits réservés.
+        </div>
+    </footer>
+
+    <style>
+      body.fade-out {
+        opacity: 0;
+        transition: opacity 0.3s ease-in-out;
+      }
+    </style>
+
+    <script>
+        document.querySelectorAll('a[href]').forEach(link => {
+            if (link.getAttribute('target') === '_blank') return;
+
+            link.addEventListener('click', function (e) {
+                const href = link.getAttribute('href');
+                if (href && !href.startsWith('#') && !href.startsWith('javascript:')) {
+                    e.preventDefault();
+                    document.body.classList.add('fade-out');
+                    setTimeout(() => {
+                        window.location.href = href;
+                    }, 300);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,142 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <title>{% if modifier %}Modifier le jeu{% else %}Ajouter un jeu{% endif %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Configuration Tailwind personnalisée -->
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        netflixDark: '#121212',
+                        netflixBlack: '#000000',
+                        netflixRed: '#e50914',
+                        lightBg: '#f5f5f5',
+                        lightCard: '#ffffff',
+                        lightAccent: '#cc0000',
+                    },
+                    fontFamily: {
+                        netflix: ['Montserrat', 'sans-serif']
+                    },
+                    animation: {
+                        fade: 'fadeIn 0.5s ease-in-out'
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: 0 },
+                            '100%': { opacity: 1 }
+                        }
+                    }
+                }
+            }
+        };
+    </script>
+
+    <!-- Police Montserrat -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+</head>
+
+<body class="relative bg-netflixBlack text-white font-netflix min-h-screen flex items-center justify-center px-4 py-10">
+
+    <!-- 🌃 Vidéo de fond -->
+    <!-- 🎬 Vidéo de fond flottante -->
+<video autoplay muted loop playsinline
+    class="absolute inset-0 w-full h-full object-cover opacity-30 blur-sm z-[-1]">
+    <source src="{% static 'videos/20250726_2345_Ajouter Jeu Futuriste_simple_compose_01k147pj6cepr8kbw85sx16m00.mp4' %}" type="video/mp4">
+</video>
+
+
+   <!-- 🔙 Bouton retour amélioré -->
+<a href="{% url 'list_jeux' %}"
+   class="absolute top-6 left-6 inline-flex items-center gap-2 text-sm font-semibold text-white bg-gray-800 bg-opacity-80 hover:bg-gray-700 px-4 py-2 rounded-full shadow-md backdrop-blur-md transition duration-300 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-netflixRed focus:ring-offset-2 z-10">
+   <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+   </svg>
+   Retour
+</a>
+
+<!-- 🧾 Formulaire container amélioré -->
+<div class="relative bg-gradient-to-br from-[#1a1a1a]/90 to-[#121212]/80 backdrop-blur-md shadow-2xl rounded-2xl border border-gray-700 p-10 w-full max-w-xl z-0 animate-fade">
+
+    <!-- Titre -->
+    <h1 class="text-3xl sm:text-4xl font-bold text-center mb-8">
+        {% if modifier %}Modifier le jeu{% else %}Ajouter un nouveau jeu vidéo{% endif %}
+    </h1>
+
+    <!-- ✅ Messages Django -->
+    {% if messages %}
+        <div id="success-msg" class="mb-4 transition-opacity duration-1000">
+            {% for message in messages %}
+                <div class="text-center p-3 bg-green-600 text-white rounded shadow">
+                    {{ message }}
+                </div>Supprimer
+
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- ❌ Erreurs de formulaire -->
+    {% if form.errors %}
+        <div class="mb-4 p-4 bg-red-600 bg-opacity-10 border border-red-400 text-red-300 rounded">
+            <p class="font-semibold mb-2">Veuillez corriger les erreurs ci-dessous :</p>
+            <ul class="list-disc list-inside text-sm">
+                {% for field in form %}
+                    {% for error in field.errors %}
+                        <li><strong>{{ field.label }} :</strong> {{ error }}</li>
+                    {% endfor %}
+                {% endfor %}
+                {% for error in form.non_field_errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+
+    <!-- 📝 Formulaire -->
+    <form method="post" enctype="multipart/form-data" class="space-y-5">
+        {% csrf_token %}
+        {% for field in form.visible_fields %}
+            <div>
+                <label for="{{ field.id_for_label }}" class="block mb-1 font-medium">
+                    {{ field.label }}
+                </label>
+                {{ field }}
+                {% if field.help_text %}
+                    <p class="text-xs text-gray-400 mt-1">{{ field.help_text }}</p>
+                {% endif %}
+            </div>
+        {% endfor %}
+
+        <!-- 🔘 Bouton soumission amélioré -->
+        <div class="pt-4 text-center">
+            <button type="submit"
+                class="bg-netflixRed hover:bg-red-600 text-white font-semibold py-2 px-8 rounded-lg shadow-xl hover:shadow-red-600/40 transition duration-300 transform hover:scale-105">
+                {% if modifier %}Enregistrer les modifications{% else %}Ajouter le jeu{% endif %}
+            </button>
+        </div>
+    </form>
+</div>
+
+
+    <!-- ✅ Script disparition automatique des messages -->
+    <script>
+        setTimeout(() => {
+            const msg = document.getElementById('success-msg');
+            if (msg) {
+                msg.style.opacity = '0';
+                msg.style.transition = 'opacity 0.5s ease-out';
+                setTimeout(() => msg.remove(), 500);
+            }
+        }, 4000);
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,172 @@
+{% extends "layout.html" %}
+{% load static %}
+
+{% block title %}Liste des Jeux Vidéo – ManoGame{% endblock %}
+
+{% block content %}
+
+<!-- 🎬 Vidéo de fond -->
+<div class="fixed inset-0 -z-10 overflow-hidden">
+  <video autoplay muted loop playsinline preload="auto"
+         class="w-full h-full object-cover opacity-20 blur-sm">
+      <source src="{% static 'videos/background-netflix.mp4' %}" type="video/mp4">
+  </video>
+</div>
+
+<!-- ✅ Message Flash élégant -->
+{% if messages %}
+<div id="message-container" class="fixed top-6 left-1/2 transform -translate-x-1/2 z-50 max-w-md w-full px-4 animate-fade">
+    {% for message in messages %}
+    <div class="flex items-center gap-3 p-4 bg-green-600 text-white rounded-lg shadow-lg shadow-black/50 border border-green-400 animate-fade-in-down">
+        <svg class="w-6 h-6 text-white shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+        </svg>
+        <span class="text-sm font-medium">
+            {{ message }}
+        </span>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<!-- 🧭 Titre principal -->
+<h1 class="text-4xl font-extrabold text-center mb-10 tracking-wider animate-fade">Liste des Jeux Vidéo</h1>
+
+<!-- 🔍 Filtres -->
+<form method="get" class="bg-black/60 backdrop-blur-sm text-white rounded-xl shadow p-6 mb-10 flex flex-wrap gap-4 items-end justify-between animate-fade">
+    <input type="text" name="recherche" placeholder="Rechercher un jeu (titre)..." value="{{ request.GET.recherche }}"
+        class="flex-grow px-4 py-2 min-w-[200px] bg-[#2a2a2a] border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#e50914]">
+
+    <select name="plateforme" class="px-4 py-2 bg-[#2a2a2a] border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#e50914]">
+        <option value="">Toutes les plateformes</option>
+        {% for pf in plateformes %}
+        <option value="{{ pf }}" {% if request.GET.plateforme == pf %}selected{% endif %}>{{ pf }}</option>
+        {% endfor %}
+    </select>
+
+    <select name="genre" class="px-4 py-2 bg-[#2a2a2a] border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#e50914]">
+        <option value="">Tous les genres</option>
+        {% for g in genres %}
+        <option value="{{ g }}" {% if request.GET.genre == g %}selected{% endif %}>{{ g }}</option>
+        {% endfor %}
+    </select>
+
+    <select name="note_min" class="px-4 py-2 bg-[#2a2a2a] border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#e50914]">
+        <option value="">Toutes les notes</option>
+        {% for n in notes %}
+        <option value="{{ n }}" {% if request.GET.note_min == n|stringformat:"s" %}selected{% endif %}>Note ≥ {{ n }}/10</option>
+        {% endfor %}
+    </select>
+
+    <button type="submit" class="bg-[#e50914] hover:bg-[#b00710] transition px-6 py-2 rounded-lg font-semibold text-white">
+        Appliquer les filtres
+    </button>
+</form>
+
+<!-- 🗂️ Liste des jeux -->
+{% if jeux %}
+<div id="cardsContainer" class="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 animate-fade">
+    {% for jeu in jeux %}
+    <div class="relative bg-[#1c1c1c] rounded-xl overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-[0_0_30px_#e50914] hover:ring-2 hover:ring-[#00ff99]">
+
+        <!-- 🎨 Jaquette -->
+        <img 
+            src="{% if jeu.jaquette %}{{ jeu.jaquette.url }}{% else %}{% static 'images/jaquettes/default_cover.png' %}{% endif %}" 
+            alt="Jaquette du jeu {{ jeu.titre }}"
+            class="w-full h-48 object-cover rounded-t-xl shadow-inner shadow-black/40 transition duration-300 group-hover:scale-105"
+        />
+
+        <!-- 📝 Titre + note -->
+        <div class="p-4 border-b border-[#333] flex items-center justify-between">
+            <h2 class="text-lg font-semibold truncate">{{ jeu.titre }}</h2>
+            {% if jeu.note_personnelle %}
+            <div class="bg-[#e50914] text-white text-xs px-3 py-1 rounded-full font-semibold shadow-md animate-pulse">
+                {{ jeu.note_personnelle }}/10
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- 📋 Détails -->
+        <div class="p-4 text-sm grid gap-1 text-gray-300">
+            <p><span class="text-gray-400 font-medium">🎮 Plateforme :</span> {{ jeu.get_plateforme_display }}</p>
+            <p><span class="text-gray-400 font-medium">🎯 Genre :</span> {{ jeu.get_genre_display }}</p>
+            <p><span class="text-gray-400 font-medium">🗓️ Date :</span> {{ jeu.date_de_sortie|date:"d/m/Y" }}</p>
+        </div>
+
+        <!-- ⚙️ Actions -->
+        <div class="p-4 border-t border-[#333] flex justify-between text-sm">
+            <a href="{% url 'modifier_jeu' jeu.id %}" class="text-blue-400 hover:text-blue-600 transition font-medium">Modifier</a>
+            <a href="{% url 'confirmer_suppression' jeu.id %}" class="text-red-400 hover:text-red-600 transition font-medium">Supprimer</a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<p class="text-center mt-10 text-gray-400 animate-fade">Aucun jeu ne correspond à votre recherche.</p>
+{% endif %}
+
+<!-- ❌ Modale de suppression -->
+{% if confirm_delete %}
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
+    <div class="bg-[#1e1e1e] text-white p-8 rounded-xl shadow-xl max-w-md w-full text-center animate-fade">
+        <h2 class="text-2xl font-bold text-red-600 mb-4">Confirmation de suppression</h2>
+        <p class="text-gray-300 mb-6 leading-relaxed">
+            Supprimer <strong>{{ jeu.titre }}</strong> ({{ jeu.plateforme }}) ?<br>
+            <span class="text-sm text-red-400 font-medium">Cette action est irréversible.</span>
+        </p>
+        <form method="post">
+            {% csrf_token %}
+            <div class="flex justify-center gap-4">
+                <a href="{% url 'list_jeux' %}" class="px-4 py-2 text-sm bg-[#444] text-white rounded-md hover:bg-[#666] transition">Annuler</a>
+                <button type="submit" autofocus class="px-4 py-2 text-sm bg-[#e50914] text-white rounded-md hover:bg-[#b00710] transition focus:outline-none focus:ring-2 focus:ring-[#e50914]">Supprimer définitivement</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endif %}
+
+<!-- 🎯 Scripts -->
+<script src="https://cdn.skypack.dev/@hotwired/turbo"></script>
+
+<script>
+    // Disparition automatique des messages
+    setTimeout(() => {
+        const msg = document.getElementById('message-container');
+        if (msg) {
+            msg.style.transition = 'opacity 0.5s ease-out';
+            msg.style.opacity = '0';
+            setTimeout(() => msg.remove(), 500);
+        }
+    }, 4000);
+
+    // Transition page fade-out
+    document.querySelectorAll('a[href]').forEach(link => {
+        if (link.getAttribute('target') === '_blank') return;
+        link.addEventListener('click', function (e) {
+            const href = link.getAttribute('href');
+            if (href && !href.startsWith('#') && !href.startsWith('javascript:')) {
+                e.preventDefault();
+                document.body.classList.add('fade-out');
+                setTimeout(() => {
+                    window.location.href = href;
+                }, 300);
+            }
+        });
+    });
+</script>
+
+<style>
+@keyframes fade-in-down {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in-down {
+  animation: fade-in-down 0.5s ease-out both;
+}
+body.fade-out {
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+}
+</style>
+
+{% endblock %}

@@ -1,0 +1,159 @@
+{% extends "layout.html" %}
+{% load static %}
+
+{% block title %}Accueil – ManoGame{% endblock %}
+
+{% block content %}
+<!-- ✅ Flash messages -->
+{% if messages %}
+<div id="message-container" class="mt-6 mb-4 w-full max-w-xl animate-fade transition-opacity duration-500 mx-auto">
+    {% for message in messages %}
+    <div class="bg-green-600 text-white p-3 rounded text-center shadow">
+        {{ message }}
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<!-- ✅ Section principale -->
+<section class="relative z-10 flex flex-col items-center text-center gap-8 px-4">
+
+  <!-- 🎬 Vidéo de fond avec playlist -->
+  <div class="fixed inset-0 -z-10 overflow-hidden bg-black">
+      <video id="bg-video" autoplay muted playsinline preload="auto"
+             class="absolute top-1/2 left-1/2 min-w-full min-h-full w-auto h-auto -translate-x-1/2 -translate-y-1/2 object-contain opacity-40">
+          <source src="{% static 'videos/20250726_1946_Futuristic Gaming Atmosphere_simple_compose_01k13t2dkhf1ysns6zz5yp882h.mp4' %}" type="video/mp4">
+      </video>
+  </div>
+
+  <!-- ✅ Logo animé en 3D (texte ManoGame) -->
+  <div class="text-[48px] md:text-[64px] font-black font-netflix text-white tracking-widest animate-logo3D drop-shadow-2xl">
+    ManoGame
+  </div>
+
+  <p class="text-gray-400 text-lg max-w-xl animate-fade delay-100">
+      Gère, note et explore tes jeux favoris dans une interface fluide et moderne.
+  </p>
+
+  <!-- ✅ Statistiques dynamiques -->
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 w-full max-w-5xl px-4 animate-fade delay-200">
+      <div class="bg-black/40 backdrop-blur-md p-6 rounded-xl shadow-xl text-center hover:scale-105 transition">
+          <p class="text-3xl font-bold">{{ total_jeux|default:"0" }}</p>
+          <p class="text-sm text-gray-300">Jeux enregistrés</p>
+      </div>
+      <div class="bg-black/40 backdrop-blur-md p-6 rounded-xl shadow-xl text-center hover:scale-105 transition delay-100">
+          <p class="text-3xl font-bold">{{ total_plateformes|default:"0" }}</p>
+          <p class="text-sm text-gray-300">Plateformes</p>
+      </div>
+      <div class="bg-black/40 backdrop-blur-md p-6 rounded-xl shadow-xl text-center hover:scale-105 transition delay-200">
+          <p class="text-3xl font-bold">{{ total_genres|default:"0" }}</p>
+          <p class="text-sm text-gray-300">Genres disponibles</p>
+      </div>
+  </div>
+
+  <!-- ✅ Actions -->
+  <div class="flex flex-wrap justify-center gap-4 animate-fade delay-300">
+      <a href="{% url 'list_jeux' %}" class="bg-netflixRed hover:bg-red-700 text-white px-6 py-3 rounded-full font-semibold transition hover:scale-105" aria-label="Accéder à la liste des jeux">
+          Voir la liste
+      </a>
+      <a href="{% url 'ajouter_jeu' %}" class="bg-white text-black hover:bg-gray-100 px-6 py-3 rounded-full font-semibold transition hover:scale-105" aria-label="Ajouter un nouveau jeu">
+          Ajouter un jeu
+      </a>
+  </div>
+
+  <!-- ✅ Illustration -->
+  <div class="animate-fade delay-400">
+      <img src="{% static 'images/gamepad-icon.png' %}" alt="Icône de jeu" class="w-20 sm:w-24 opacity-80 mx-auto hover:scale-110 hover:rotate-2 transition duration-300" loading="lazy">
+  </div>
+
+  <!-- ✅ Citation -->
+  <p class="text-gray-400 italic text-sm animate-fade delay-500">
+      Chaque jeu a une histoire. Commence ta collection.
+  </p>
+
+</section>
+
+<!-- ✅ Bannière de bienvenue -->
+<div id="welcome-banner" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-90 text-white backdrop-blur-md animate-fadeInSlow">
+  <div class="text-center space-y-4">
+    <h1 class="text-4xl md:text-5xl font-bold tracking-wide animate-pulseSlow">
+      🎮 Bienvenue sur <span class="text-netflixRed">ManoGame</span>
+    </h1>
+    <p class="text-lg text-gray-300">Ta collection vidéoludique, élégante et personnalisée.</p>
+    <button onclick="dismissBanner()" class="mt-4 bg-netflixRed hover:bg-red-700 transition px-6 py-2 rounded-full font-semibold shadow">
+      Commencer
+    </button>
+  </div>
+</div>
+
+<!-- ✅ Styles custom -->
+<style>
+  @keyframes fadeInSlow {
+    0% { opacity: 0; transform: scale(0.95); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+  .animate-fadeInSlow {
+    animation: fadeInSlow 1.2s ease-out;
+  }
+
+  @keyframes pulseSlow {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.05); opacity: 0.8; }
+  }
+  .animate-pulseSlow {
+    animation: pulseSlow 2.5s infinite;
+  }
+
+  .fade-out {
+    opacity: 0;
+    transition: opacity 0.7s ease-out;
+  }
+
+  @keyframes logo3D {
+    0% { transform: rotateY(0deg) scale(0.9); opacity: 0; }
+    100% { transform: rotateY(360deg) scale(1); opacity: 1; }
+  }
+  .animate-logo3D {
+    animation: logo3D 1.8s ease-out;
+    transform-origin: center;
+    will-change: transform, opacity;
+  }
+</style>
+
+<!-- ✅ JS pour messages & vidéos -->
+<script>
+  // Disparition des messages
+  setTimeout(() => {
+    const msg = document.getElementById('message-container');
+    if (msg) {
+      msg.style.transition = 'opacity 0.5s ease-out';
+      msg.style.opacity = '0';
+      setTimeout(() => msg.remove(), 500);
+    }
+  }, 4000);
+
+  // Enchaînement de vidéos
+  document.addEventListener('DOMContentLoaded', function () {
+    const video = document.getElementById('bg-video');
+    const playlist = [
+      "{% static 'videos/20250726_1946_Futuristic Gaming Atmosphere_simple_compose_01k13t2dkhf1ysns6zz5yp882h.mp4' %}",
+      "{% static 'videos/20250726_1946_Futuristic Gaming Atmosphere_simple_compose_01k13t2dn5fwfryabmsq26d27r.mp4' %}"
+    ];
+    let current = 0;
+    video.addEventListener('ended', () => {
+      current = (current + 1) % playlist.length;
+      video.src = playlist[current];
+      video.play();
+    });
+  });
+
+  // Dismiss welcome banner
+  function dismissBanner() {
+    const banner = document.getElementById('welcome-banner');
+    if (banner) {
+      banner.classList.add('fade-out');
+      setTimeout(() => banner.remove(), 700);
+    }
+  }
+</script>
+{% endblock %}
