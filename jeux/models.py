@@ -49,7 +49,7 @@ class JeuVideo(models.Model):
         null=True
     )
 
-    # ✅ Ajout du champ pour la jaquette
+    #Ajout du champ pour la jaquette
     jaquette = models.ImageField(upload_to='jaquettes/', blank=True, null=True)
 
     def __str__(self):

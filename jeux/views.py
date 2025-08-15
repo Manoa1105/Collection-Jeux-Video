@@ -13,7 +13,7 @@ def accueil(request):
     total_genres = JeuVideo.objects.values('genres').distinct().count()
 
     tous_les_jeux = list(JeuVideo.objects.all())
-    jeux_affiches = sample(tous_les_jeux, min(7, len(tous_les_jeux)))  # max 7 jeux aléatoires
+    jeux_affiches = sample(tous_les_jeux, min(7, len(tous_les_jeux)))
 
     return render(request, 'accueil.html', {
         'total_jeux': total_jeux,
@@ -22,7 +22,7 @@ def accueil(request):
         'jeux': jeux_affiches,
     })
 
-# ✅ Ajouter un jeu
+# Ajouter un jeu
 def ajouter_jeu(request):
     if request.method == 'POST':
         form = JeuVideoForm(request.POST, request.FILES)
@@ -34,7 +34,7 @@ def ajouter_jeu(request):
         form = JeuVideoForm()
     return render(request, 'ajouter_jeu.html', {'form': form})
 
-# ✅ Lister les jeux avec filtres
+# Lister les jeux avec filtres
 def list_jeux(request):
     plateforme = request.GET.get('plateforme')
     genre = request.GET.get('genre')
@@ -60,7 +60,7 @@ def list_jeux(request):
     }
     return render(request, 'list_jeux.html', context)
 
-# ✅ Modifier un jeu
+# Modifier un jeu
 def modifier_jeu(request, id):
     jeu = get_object_or_404(JeuVideo, pk=id)
     if request.method == 'POST':
@@ -73,14 +73,14 @@ def modifier_jeu(request, id):
         form = JeuVideoForm(instance=jeu)
     return render(request, 'ajouter_jeu.html', {'form': form, 'modifier': True})
 
-# ✅ Supprimer immédiatement un jeu
+# Supprimer immédiatement un jeu
 def supprimer_jeu(request, id):
     jeu = get_object_or_404(JeuVideo, pk=id)
     jeu.delete()
     messages.success(request, f"Le jeu « {jeu.titre} » a été supprimé avec succès.")
     return redirect('list_jeux')
 
-# ✅ Confirmation de suppression (modale)
+# Confirmation de suppression
 def confirmer_suppression(request, pk):
     jeu = get_object_or_404(JeuVideo, pk=pk)
     if request.method == "POST":
