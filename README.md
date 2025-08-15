@@ -83,7 +83,6 @@ django-admin runserver
 
 ---
 
----
 
 
 ## 👨‍💻 Auteur
